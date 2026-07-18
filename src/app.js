@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 
-const app = express()
+const app = express();
 
 
 
-export { app }
+export default { app };
