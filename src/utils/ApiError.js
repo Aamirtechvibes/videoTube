@@ -1,4 +1,4 @@
-import { ApiResponse } from "./ApiResponse";
+import { ApiResponse } from "./ApiResponse.js";
 
 class ApiError extends Error {
     constructor(
@@ -15,9 +15,9 @@ class ApiError extends Error {
         this.errors = errors
 
         if (stack) {
-            this.stack = stack;
+            this.stack = stack;  // Use the original stack trace
         } else {
-            Error.captureStackTrace(this, this.constructor);
+            Error.captureStackTrace(this, this.constructor); // Generate a new stack trace
         }
     }
 }
