@@ -26,15 +26,15 @@ const userSchema = new Schema(
             index: true
         },
         avatar: {
-            type: {
-                url: String,
-                localPath: String,
+            
+                type: String,
+                required: true
             },
-            default: {
-                url: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-                localPath: "",
-            },
-        },
+            //default: {
+            //    string: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+            //    localPath: "",
+            //},
+        
         coverImage: {
             type: String, //cloudinary url
         },

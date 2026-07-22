@@ -1,14 +1,17 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs, { unlink } from "fs";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View API Keys' above to copy your API secret
-});
-
 // Upload an image
 const uploadOnCloudinary = async (localFilePath) => {
+
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    //console.log(cloudinary.config());
+
     try {
         if (!localFilePath) return null
         const response = await cloudinary.uploader.upload(localFilePath, {
@@ -21,5 +24,8 @@ const uploadOnCloudinary = async (localFilePath) => {
         console.error(error, "not uploaded")
     }
 }
+
+//console.log(process.env.CLOUDINARY_URL);
+
 
 export { uploadOnCloudinary }

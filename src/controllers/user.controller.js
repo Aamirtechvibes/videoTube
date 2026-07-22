@@ -21,7 +21,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullName, password } = req.body
 
     if (
-        [username, email, fullName, avatar, coverImage, password].some((field) => field?.trim() == "")
+        [username, email, fullName, password].some((field) => field?.trim() == "")
     ) {
         throw new ApiError(400, "All fields is required")
     }
@@ -46,14 +46,22 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     const user = await User.create({
-        username: username.toLowerCase() ,
+        username: username.toLowerCase(),
         email,
         fullName,
-        avatar: avatar.url ,
+        avatar: avatar?.url ,
         coverImage: coverImage?.url || "",
         password,
     })
+    
+    // Cloudinary Config test
 
+    //console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+    //console.log("API Key:", process.env.CLOUDINARY_API_KEY);
+    //console.log("API Secret:", process.env.CLOUDINARY_API_SECRET ? "FOUND" : "NOT FOUND");
+    //console.log(cloudinary.config());
+
+    // checking user is created 
     const userCreated = await User.findById(user._id).select(
         "-password -refreshToken"
     )
