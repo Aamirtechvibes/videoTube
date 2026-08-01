@@ -303,74 +303,74 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "Fullname  and email updated successfuly"))
 })
 
-const updateUserAvatar = asyncHandler(async(req,res) => {
+const updateUserAvatar = asyncHandler(async (req, res) => {
 
     const avatarLocalPath = req.file?.path
 
     if (!avatarLocalPath) {
-        throw new ApiError(400,"Avatar file is missing")
+        throw new ApiError(400, "Avatar file is missing")
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
     if (!avatar.url) {
-       throw new ApiError(400,"Error while uploading on avatar")
+        throw new ApiError(400, "Error while uploading on avatar")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
+            $set: {
                 avatar: avatar.url
             }
         },
         { new: true })
         .select("-password -refreshToken")
 
-        return res
-            .status(200)
-            .json(
-                new ApiResponse(
-                    200,
-                    user,
-                    "Avatar is updated successfully"
-                )
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user,
+                "Avatar is updated successfully"
             )
+        )
 })
 
-const updateUserCoverImage = asyncHandler(async(req,res) => {
+const updateUserCoverImage = asyncHandler(async (req, res) => {
 
     const coverImageLocalPath = req.file?.path
 
     if (!coverImageLocalPath) {
-        throw new ApiError(400,"Cover image file is missing")
+        throw new ApiError(400, "Cover image file is missing")
     }
 
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!coverImage.url) {
-       throw new ApiError(400,"Error while uploading on cover image")
+        throw new ApiError(400, "Error while uploading on cover image")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
+            $set: {
                 coverImage: coverImage.url
             }
         },
         { new: true })
         .select("-password -refreshToken")
 
-        return res
-            .status(200)
-            .json(
-                new ApiResponse(
-                    200,
-                    user,
-                    "Cover Image is updated successfully"
-                )
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user,
+                "Cover Image is updated successfully"
             )
+        )
 })
 
 export { registerUser, loginUser, logoutUser, regenerateAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, updateUserAvatar, updateUserCoverImage }
