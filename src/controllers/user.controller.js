@@ -177,9 +177,9 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
-            }
+            $unset: {
+                refreshToken: 1 // set give undifine which is not updating so
+            }                   // $unset: is the solution
         },
         {
             new: true
@@ -203,7 +203,7 @@ const regenerateAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
-        throw new ApiError(401, "Unauthorised Request")
+        throw new ApiError(401, "Unauthorised request")
     }
 
     try {
@@ -220,14 +220,15 @@ const regenerateAccessToken = asyncHandler(async (req, res) => {
         }
 
 
-        const refreshToken = user?.refreshToken
+        // const refreshToken = user?.refreshToken
 
-        if (incomingRefreshToken !== refreshToken) {
+        if (incomingRefreshToken !== user?.refreshToken) {
             throw new ApiError(400, "Refresh token is expired")
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user._id)
+        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
 
+        // console.log("refreshToken:",refreshToken)
         const options = {
             httpOnly: true,
             secure: true
@@ -235,21 +236,21 @@ const regenerateAccessToken = asyncHandler(async (req, res) => {
 
         return res.status(200)
             .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
+            .cookie("refreshToken", refreshToken, options)
             .json(
                 new ApiResponse(
                     200,
                     {
 
                         accessToken,
-                        newRefreshToken
+                        refreshToken
                     },
                     "Access Token Refreshed"
                 )
             )
 
     } catch (error) {
-        throw new ApiError(401, error?.message, "Invalid refresh token")
+        throw new ApiError(401, error?.message || "Invalid refresh token")
     }
 
 })
@@ -285,9 +286,24 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email } = req.body
 
-    if (!fullName || !email) {
-        throw new ApiError(400, "Full name and email both required")
+    const fields = [fullName, email];
+
+    const hasValidField = fields.some(
+        field => field?.trim()
+    );
+
+    if (!hasValidField) {
+        throw new ApiError(
+            400,
+            "Please provide at least a full name or an email to update."
+        );
     }
+    // if (!fullName) {
+    //     throw new ApiError(400, "Full name required")
+    // }
+    // if (!email) {
+    //     throw new ApiError(400, "Email required")
+    // }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
@@ -455,7 +471,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                user: new mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
         {
@@ -476,24 +492,28 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                                     $project: {
                                         fullName: 1,
                                         username: 1,
-                                        email: 1,
+                                        avatar: 1,
                                     }
 
-                                },
-                                {
-                                    $addFields: {
-                                        owner: {
-                                            $first: "$owner"
-                                        }
-                                    }
                                 }
                             ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
                         }
                     }
                 ]
             }
         }
     ])
+
+    // console.log("user:",user);
+    // console.log("user[0]:",user[0]);
+    // console.log("user[0].watchHistory:",user[0].watchHistory);
 
     return res
         .status(200)
